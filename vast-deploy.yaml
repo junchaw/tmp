@@ -1,0 +1,518 @@
+---
+# Source: vastcsi/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-vast-controller-sa
+  namespace: "platform-engineering-resources"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: vastcsi/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: csi-vast-node-sa
+  namespace: "platform-engineering-resources"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: vastcsi/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csi-vast-mgmt
+  namespace: "platform-engineering-resources"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    checksum/vast-mgmt-secret: 053c8808b5a2164adce31026d8b7c2563b0b3014a0577763198aa80dc2c74f19
+type: Opaque
+data:
+  username: "Q1NJ"
+  password: "QmE1NFhzIj19KTx3JypyXQ=="
+---
+# Source: vastcsi/templates/storage-class.yaml
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+provisioner: csi.vastdata.com
+metadata:
+  name: vastdata-filesystem
+  namespace: "platform-engineering-resources"
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+parameters:
+  vip_pool_name: "Data"
+  root_export: "/k8s"
+  view_policy: "default"
+  lb_strategy: "roundrobin"
+  volume_name_fmt: "csi:{namespace}:{name}:{id}"
+  eph_volume_name_fmt: "csi:{namespace}:{name}:{id}"
+allowVolumeExpansion: true
+mountOptions:
+  - ""
+---
+# Source: vastcsi/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csi-vast-provisioner-role
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents/status"]
+    verbs: ["update", "patch"]
+---
+# Source: vastcsi/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csi-vast-attacher-role
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments/status"]
+    verbs: ["patch"]
+---
+# Source: vastcsi/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-resizer-runner
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims/status"]
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+---
+# Source: vastcsi/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csi-vast-provisioner-binding
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: csi-vast-controller-sa
+    namespace: "platform-engineering-resources"
+roleRef:
+  kind: ClusterRole
+  name: csi-vast-provisioner-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: vastcsi/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csi-vast-attacher-binding
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: csi-vast-controller-sa
+    namespace: "platform-engineering-resources"
+roleRef:
+  kind: ClusterRole
+  name: csi-vast-attacher-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: vastcsi/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: csi-resizer-role
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+subjects:
+  - kind: ServiceAccount
+    name: csi-vast-controller-sa
+    namespace: "platform-engineering-resources"
+roleRef:
+  kind: ClusterRole
+  name: external-resizer-runner
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: vastcsi/templates/node.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-vast-node
+  namespace: "platform-engineering-resources"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/csi-role: "node"
+spec:
+  selector:
+    matchLabels:
+      app: "csi-vast-node"
+      app.kubernetes.io/name: vastcsi
+      app.kubernetes.io/instance: vastcsi
+  template:
+    metadata:
+      labels:
+        app: csi-vast-node
+        role: csi-vast
+        helm.sh/chart: vastcsi-0.2.0
+        app.kubernetes.io/name: vastcsi
+        app.kubernetes.io/instance: vastcsi
+        app.kubernetes.io/managed-by: Helm
+      annotations:
+        checksum/secret: 22620efc9ec6cf1e31be3f29ecb876ef6b77dcd6f3688d7d2ab5cc9d194b9a18
+    spec:
+      containers:
+        - name: csi-node-driver-registrar
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "rm -rf /registration/csi.vastdata.com /registration/csi.vastdata.com-reg.sock"]
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/lib/kubelet/plugins/csi.vastdata.com/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi/
+            - name: registration-dir
+              mountPath: /registration/
+        - name: csi-vast-plugin
+          image: vastdataorg/csi:v2.2.1
+          args:
+            - "serve"
+          imagePullPolicy: IfNotPresent
+          env:            
+            - name: X_CSI_PLUGIN_NAME
+              value: "csi.vastdata.com"
+            - name: X_CSI_VMS_HOST
+              value: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
+            - name: X_CSI_ENABLE_VMS_SSL_VERIFICATION
+              value: "false"
+            - name: X_CSI_DELETION_VIP_POOL_NAME
+              value: "Data"
+            - name: X_CSI_DELETION_VIEW_POLICY
+              value: "default"
+            - name: X_CSI_TRUNCATE_VOLUME_NAME
+              value: "64"
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: X_CSI_MODE
+              value: node
+            - name: X_CSI_NODE_ID
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: pods-mount-dir
+              mountPath: /var/lib/kubelet
+              mountPropagation: "Bidirectional"
+            - name: device-dir
+              mountPath: /dev            
+            - name: vms-auth
+              mountPath: /opt/vms-auth
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      serviceAccount: csi-vast-node-sa
+      volumes:
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: DirectoryOrCreate
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi.vastdata.com
+            type: DirectoryOrCreate
+        - name: pods-mount-dir
+          hostPath:
+            path: /var/lib/kubelet
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev        
+        - name: vms-auth
+          projected:
+            defaultMode: 0400
+            sources:
+            - secret:
+                name: csi-vast-mgmt
+                items:
+                - key: username
+                  path: username
+                - key: password
+                  path: password
+---
+# Source: vastcsi/templates/controller.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: csi-vast-controller
+  namespace: "platform-engineering-resources"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/csi-role: "controller"
+spec:
+  serviceName: "csi-vast"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-vast-controller
+      app.kubernetes.io/name: vastcsi
+      app.kubernetes.io/instance: vastcsi
+  template:
+    metadata:
+      annotations:
+        checksum/secret: 22620efc9ec6cf1e31be3f29ecb876ef6b77dcd6f3688d7d2ab5cc9d194b9a18
+      labels:
+        role: csi-vast
+        app: csi-vast-controller
+        helm.sh/chart: vastcsi-0.2.0
+        app.kubernetes.io/name: vastcsi
+        app.kubernetes.io/instance: vastcsi
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      containers:
+        - name: csi-provisioner
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v3.2.1
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--extra-create-metadata"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-attacher
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-snapshotter
+          image: k8s.gcr.io/sig-storage/csi-snapshotter:v6.0.1
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--extra-create-metadata"
+            - "--leader-election=false"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-resizer
+          image: k8s.gcr.io/sig-storage/csi-resizer:v1.1.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-vast-plugin
+          image: vastdataorg/csi:v2.2.1
+          args:
+            - "serve"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          env:            
+            - name: X_CSI_PLUGIN_NAME
+              value: "csi.vastdata.com"
+            - name: X_CSI_VMS_HOST
+              value: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
+            - name: X_CSI_ENABLE_VMS_SSL_VERIFICATION
+              value: "false"
+            - name: X_CSI_DELETION_VIP_POOL_NAME
+              value: "Data"
+            - name: X_CSI_DELETION_VIEW_POLICY
+              value: "default"
+            - name: X_CSI_TRUNCATE_VOLUME_NAME
+              value: "64"
+            - name: CSI_ENDPOINT
+              value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: X_CSI_MODE
+              value: controller
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/            
+            - name: vms-auth
+              mountPath: /opt/vms-auth
+      hostNetwork: true
+      priorityClassName: system-cluster-critical
+      serviceAccount: csi-vast-controller-sa
+      volumes:
+        - name: socket-dir
+          emptyDir: {}        
+        - name: vms-auth
+          projected:
+            defaultMode: 0400
+            sources:
+            - secret:
+                name: csi-vast-mgmt
+                items:
+                - key: username
+                  path: username
+                - key: password
+                  path: password
+---
+# Source: vastcsi/templates/csi-driver.yaml
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: csi.vastdata.com
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+spec:
+  attachRequired: true
+  podInfoOnMount: true
+  volumeLifecycleModes:
+    - Persistent
+    - Ephemeral
+---
+# Source: vastcsi/templates/snapshot-class.yaml
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: "vastdata-snapshot"
+  namespace: "platform-engineering-resources"
+  annotations:
+    snapshot.storage.kubernetes.io/is-default-class: "true"
+  labels:
+    helm.sh/chart: vastcsi-0.2.0
+    app.kubernetes.io/name: vastcsi
+    app.kubernetes.io/instance: vastcsi
+    app.kubernetes.io/managed-by: Helm
+driver: csi.vastdata.com
+deletionPolicy: "Delete"
+parameters:
+  snapshot_name_fmt: "csi:{namespace}:{name}:{id}"

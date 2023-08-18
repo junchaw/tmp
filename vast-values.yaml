@@ -2,10 +2,10 @@
 # VAST REST SESSION ATTRIBUTES
 ####################
 # Credentials to login - must be provided by user
-username: ""
-password: ""
+username: "CSI"
+password: "Ba54Xs\"=})<w'*r]"
 # API endpoint of VAST appliance - must be provided by user
-endpoint: ""
+endpoint: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
 
 # Set true to enable certificate validity test
 verifySsl: false
@@ -18,10 +18,10 @@ sslCert: ""
 ####################
 # Dedicated vip pool to delete volumes. Can have the same value as regular StorageClass option `vipPool`
 # - must be provided by user
-deletionVipPool: ""
+deletionVipPool: "Data"
 # Dedicated view policy to delete volumes. Can have the same value as regular StorageClass option `viewPolicy`
 # - must be provided by user
-deletionViewPolicy: ""
+deletionViewPolicy: "default"
 
 ####################
 # VAST CSI STORAGE CLASS OPTIONS
@@ -30,11 +30,11 @@ deletionViewPolicy: ""
 # for particular storageClass in 'storageClasses' section
 storageClassDefaults:
   # Where volumes will be located on VAST - must be provided by user
-  storagePath: ""
+  storagePath: "/k8s"
   # Name of VAST VIP pool to use - must be provided by user
-  vipPool: ""
+  vipPool: "Data"
   # VAST policy name to create views - must be provided by user
-  viewPolicy: ""
+  viewPolicy: "default"
   # Allows resizing existing volumes
   allowVolumeExpansion: true
   # Load-balancing strategy
@@ -54,11 +54,11 @@ storageClassDefaults:
 # The only required value is 'vipPool' name where user should provide name of existing vip pool on
 # VAST cluster.
 # User can extend this section using more storage classes with different storage class parameters and options.
-storageClasses: {}
+storageClasses:
   # StorageClass name. This field must be unique across all storage classes.
-  # vastdata-filesystem:
+  vastdata-filesystem: {}
     # Name of VAST VIP pool to use - must be provided by user
-    # vipPool: ""
+    # vipPool: "Data"
     # ... Any other options from 'storageClassDefaults' section. If not provided then default value
     # will be used.
 # User can add more storage classes to this section eg:
