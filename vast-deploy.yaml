@@ -35,11 +35,11 @@ metadata:
     app.kubernetes.io/instance: vastcsi
     app.kubernetes.io/managed-by: Helm
   annotations:
-    checksum/vast-mgmt-secret: 053c8808b5a2164adce31026d8b7c2563b0b3014a0577763198aa80dc2c74f19
+    checksum/vast-mgmt-secret: 7554ad7652e44c68f2b93a602be6d3e6a3849cbcd19d33773b496eaaf576b14c
 type: Opaque
 data:
   username: "Q1NJ"
-  password: "QmE1NFhzIj19KTx3JypyXQ=="
+  password: "eGFoNzZ4eHM1dkpEZjc0dVM="
 ---
 # Source: vastcsi/templates/storage-class.yaml
 kind: StorageClass
@@ -58,7 +58,7 @@ metadata:
 parameters:
   vip_pool_name: "Data"
   root_export: "/k8s"
-  view_policy: "default"
+  view_policy: "k8s"
   lb_strategy: "roundrobin"
   volume_name_fmt: "csi:{namespace}:{name}:{id}"
   eph_volume_name_fmt: "csi:{namespace}:{name}:{id}"
@@ -247,11 +247,11 @@ spec:
         app.kubernetes.io/instance: vastcsi
         app.kubernetes.io/managed-by: Helm
       annotations:
-        checksum/secret: 22620efc9ec6cf1e31be3f29ecb876ef6b77dcd6f3688d7d2ab5cc9d194b9a18
+        checksum/secret: 4262a9e1e287208de8b9045014a928cce7501cf0b06e2a9bc5df11bd3459c602
     spec:
       containers:
         - name: csi-node-driver-registrar
-          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-node-driver-registrar:v2.0.1
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -297,7 +297,7 @@ spec:
             - name: X_CSI_DELETION_VIP_POOL_NAME
               value: "Data"
             - name: X_CSI_DELETION_VIEW_POLICY
-              value: "default"
+              value: "k8s"
             - name: X_CSI_TRUNCATE_VOLUME_NAME
               value: "64"
             - name: CSI_ENDPOINT
@@ -385,7 +385,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret: 22620efc9ec6cf1e31be3f29ecb876ef6b77dcd6f3688d7d2ab5cc9d194b9a18
+        checksum/secret: 4262a9e1e287208de8b9045014a928cce7501cf0b06e2a9bc5df11bd3459c602
       labels:
         role: csi-vast
         app: csi-vast-controller
@@ -396,7 +396,7 @@ spec:
     spec:
       containers:
         - name: csi-provisioner
-          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-provisioner:v3.2.1
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v3.2.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -416,7 +416,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
-          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-attacher:v3.1.0
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -428,7 +428,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-snapshotter
-          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-snapshotter:v6.0.1
+          image: k8s.gcr.io/sig-storage/csi-snapshotter:v6.0.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -442,7 +442,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-resizer
-          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-resizer:v1.1.0
+          image: k8s.gcr.io/sig-storage/csi-resizer:v1.1.0
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -480,7 +480,7 @@ spec:
             - name: X_CSI_DELETION_VIP_POOL_NAME
               value: "Data"
             - name: X_CSI_DELETION_VIEW_POLICY
-              value: "default"
+              value: "k8s"
             - name: X_CSI_TRUNCATE_VOLUME_NAME
               value: "64"
             - name: CSI_ENDPOINT
