@@ -251,7 +251,7 @@ spec:
     spec:
       containers:
         - name: csi-node-driver-registrar
-          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-node-driver-registrar:v2.0.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -270,13 +270,20 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           volumeMounts:
             - name: plugin-dir
               mountPath: /csi/
             - name: registration-dir
               mountPath: /registration/
         - name: csi-vast-plugin
-          image: vastdataorg/csi:v2.2.1
+          image: docker-hub-remote.artifactory.teslamotors.com/vastdataorg/csi:v2.2.1
           args:
             - "serve"
           imagePullPolicy: IfNotPresent
@@ -302,6 +309,13 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           securityContext:
             privileged: true
             capabilities:
@@ -382,7 +396,7 @@ spec:
     spec:
       containers:
         - name: csi-provisioner
-          image: k8s.gcr.io/sig-storage/csi-provisioner:v3.2.1
+          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-provisioner:v3.2.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -391,11 +405,18 @@ spec:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
-          image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
+          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-attacher:v3.1.0
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -407,7 +428,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-snapshotter
-          image: k8s.gcr.io/sig-storage/csi-snapshotter:v6.0.1
+          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-snapshotter:v6.0.1
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -421,7 +442,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-resizer
-          image: k8s.gcr.io/sig-storage/csi-resizer:v1.1.0
+          image: k8s-gcr-io-docker-remote.artifactory.teslamotors.com/sig-storage/csi-resizer:v1.1.0
           args:
             - "--csi-address=$(ADDRESS)"
             - "--v=5"
@@ -429,11 +450,18 @@ spec:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-vast-plugin
-          image: vastdataorg/csi:v2.2.1
+          image: docker-hub-remote.artifactory.teslamotors.com/vastdataorg/csi:v2.2.1
           args:
             - "serve"
           imagePullPolicy: IfNotPresent

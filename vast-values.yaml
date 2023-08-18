@@ -3,7 +3,7 @@
 ####################
 # Credentials to login - must be provided by user
 username: "CSI"
-password: "Ba54Xs\"=})<w'*r]"
+password: "xah76xxs5vJDf74uS"
 # API endpoint of VAST appliance - must be provided by user
 endpoint: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
 
@@ -21,7 +21,7 @@ sslCert: ""
 deletionVipPool: "Data"
 # Dedicated view policy to delete volumes. Can have the same value as regular StorageClass option `viewPolicy`
 # - must be provided by user
-deletionViewPolicy: "default"
+deletionViewPolicy: "k8s"
 
 ####################
 # VAST CSI STORAGE CLASS OPTIONS
@@ -34,7 +34,7 @@ storageClassDefaults:
   # Name of VAST VIP pool to use - must be provided by user
   vipPool: "Data"
   # VAST policy name to create views - must be provided by user
-  viewPolicy: "default"
+  viewPolicy: "k8s"
   # Allows resizing existing volumes
   allowVolumeExpansion: true
   # Load-balancing strategy
@@ -60,7 +60,7 @@ storageClasses:
     # Name of VAST VIP pool to use - must be provided by user
     # vipPool: "Data"
     # ... Any other options from 'storageClassDefaults' section. If not provided then default value
-    # will be used.
+  # will be used.
 # User can add more storage classes to this section eg:
 #  vastdata-filesystem2:
 #    vipPool: "vippool-2"
@@ -97,7 +97,7 @@ truncateVolumeName: 64
 imagePullPolicy: "IfNotPresent"
 
 # csiImage is base docker image for Controller and Node.
-csiImage: "vastdataorg/csi"
+csiImage: "docker-hub-remote.artifactory.teslamotors.com/vastdataorg/csi"
 
 # csiImageTag represents version of docker image that serves  CSI Controller and CSI Node.
 # To check latest stable tag refer https://support.vastdata.com/hc/en-us/articles/360010932159-VAST-with-Kubernetes
@@ -141,8 +141,6 @@ rbac: true
 #   requests:
 #      memory: "64Mi"
 #      cpu: "250m"
-resources: {}
-
 # "Limits describes the maximum amount of compute resource allowed.
 # More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
 # Example:
@@ -151,7 +149,13 @@ resources: {}
 #  limits:
 #    memory: "128Mi"
 #    cpu: "500m"
-limits: {}
+resources: |-
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"
 
 # Log level of CSI plugin
 logLevel: 5
