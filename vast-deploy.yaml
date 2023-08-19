@@ -1222,7 +1222,7 @@ spec:
             - name: X_CSI_VMS_HOST
               value: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
             - name: X_CSI_ENABLE_VMS_SSL_VERIFICATION
-              value: "false"
+              value: "true"
             - name: X_CSI_DELETION_VIP_POOL_NAME
               value: "Data"
             - name: X_CSI_DELETION_VIEW_POLICY
@@ -1439,7 +1439,7 @@ spec:
             - name: X_CSI_VMS_HOST
               value: "vst-mgmt-r305-4.mgmt.az1.sjc45.tsla.net"
             - name: X_CSI_ENABLE_VMS_SSL_VERIFICATION
-              value: "false"
+              value: "true"
             - name: X_CSI_DELETION_VIP_POOL_NAME
               value: "Data"
             - name: X_CSI_DELETION_VIEW_POLICY
